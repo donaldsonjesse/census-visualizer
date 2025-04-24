@@ -19,14 +19,20 @@ if uploaded_file:
 
         # Example: Population growth chart
         pop_df = df[df["characteristic"].str.contains("Population, 20", na=False)]
+        pop_df["total"] = pd.to_numeric(pop_df["total"], errors="coerce")
+
         fig, ax = plt.subplots()
-        bars = ax.bar(pop_df["characteristic"], pop_df["total"].astype(float), color=["gray", "blue"])
+        bars = ax.bar(pop_df["characteristic"], pop_df["total"], color=["gray", "blue"])
         ax.set_title("Population Growth (Census Years)")
         ax.bar_label(bars, fmt="%.0f")
         st.pyplot(fig)
 
         # By the Numbers box
-        pop_vals = pop_df["total"].values
+        pop_vals = pop_df["total"].dropna().values
         if len(pop_vals) == 2:
             diff = int(pop_vals[1] - pop_vals[0])
-            pct = (diff / pop
+            pct = (diff / pop_vals[0]) * 100
+            st.info(f"**By the numbers:** Population increased by **{diff:,} people** ({pct:.1f}%) from 2016 to 2021.")
+
+    except Exception as e:
+        st.error(f"Failed to process file: {e}")
